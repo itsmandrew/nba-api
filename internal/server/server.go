@@ -1,24 +1,24 @@
 package server
 
 import (
-	"database/sql"
 	"fmt"
+	internal "nba-api/internal/database"
 	h "nba-api/internal/handlers"
 	"net/http"
 	"time"
 )
 
 type Server struct {
-	db     *sql.DB
+	store  *internal.Store
 	server *http.Server
 }
 
-func New(db *sql.DB) *Server {
+func New(store *internal.Store) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.HelloHandler)
 
 	return &Server{
-		db: db,
+		store: store,
 		server: &http.Server{
 			Addr:           ":8080",
 			Handler:        mux,
