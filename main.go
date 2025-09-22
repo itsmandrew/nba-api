@@ -26,7 +26,5 @@ func main() {
 	defer store.Disconnect()
 
 	srv := server.New(store)
-	if err := srv.Start(); err != nil {
-		log.Fatal(err)
-	}
+	srv.Start()
 }

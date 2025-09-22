@@ -1,10 +1,14 @@
 package server
 
 import (
-	"fmt"
+	"context"
+	"log"
 	internal "nba-api/internal/database"
 	h "nba-api/internal/handlers"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -28,10 +32,30 @@ func New(store *internal.Store) *Server {
 			MaxHeaderBytes: 1 << 20,
 		},
 	}
-
 }
 
-func (s *Server) Start() error {
-	fmt.Println("Server starting on :8080...")
-	return s.server.ListenAndServe()
+func (s *Server) Start() {
+
+	// Run server in a goroutine so we can listen for shutdown
+	go func() {
+		log.Println("Server starting on :8080")
+		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server error: %v", err)
+		}
+	}()
+
+	// Channel to listen for OS interrupt
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	// Context w/ timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	log.Println("Server shutdown complete")
 }
