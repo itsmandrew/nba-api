@@ -15,42 +15,41 @@ type Config struct {
 	DB_URL string
 }
 
+type Store struct {
+	DB      *sql.DB
+	Queries *sqlc.Queries
+}
+
 func LoadConfig() Config {
 	return Config{
 		DB_URL: os.Getenv("DB_LOCAL_URL"),
 	}
 }
 
-// Global variables to hold the database and queries
-var (
-	DB      *sql.DB
-	Queries *sqlc.Queries
-)
-
-func ConnectDB() error {
+func ConnectDB() (*Store, error) {
 	config := LoadConfig()
 
 	db_url := config.DB_URL
 
 	db, err := sql.Open("postgres", db_url)
 	if err != nil {
-		return fmt.Errorf("could not open db: %w", err)
+		return nil, fmt.Errorf("could not open db: %w", err)
 	}
 
 	if err := db.Ping(); err != nil {
-		return fmt.Errorf("could not connect to db: %w", err)
+		return nil, fmt.Errorf("could not connect to db: %w", err)
 	}
 
-	DB = db
-	Queries = sqlc.New(DB) // Initialize sqlc Queries w/ the DB connection
-
 	log.Println("Successfully connected to the database")
-	return nil
+	return &Store{
+		DB:      db,
+		Queries: sqlc.New(db),
+	}, nil
 }
 
-func DisconnectDB() {
-	if DB != nil {
-		DB.Close()
+func (s *Store) Disconnect() {
+	if s.DB != nil {
+		s.DB.Close()
 		log.Println("Database connection closed")
 	}
 }

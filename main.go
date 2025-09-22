@@ -1,19 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
-	"time"
 
 	db "nba-api/internal/database"
+	"nba-api/internal/server"
 
 	"github.com/joho/godotenv"
 )
-
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, Configured Go Web Server!")
-}
 
 func init() {
 	err := godotenv.Load()
@@ -24,26 +18,15 @@ func init() {
 
 func main() {
 
-	err := db.ConnectDB()
-
+	store, err := db.ConnectDB()
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatal(err)
 	}
 
-	defer db.DisconnectDB()
+	defer store.Disconnect()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", helloHandler)
-
-	server := &http.Server{
-		Addr:           ":8080",
-		Handler:        mux,
-		ReadTimeout:    5 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		IdleTimeout:    15 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+	srv := server.New(store.DB)
+	if err := srv.Start(); err != nil {
+		log.Fatal(err)
 	}
-
-	fmt.Println("Server starting with custom configurations on port 8080...")
-	log.Fatal(server.ListenAndServe())
 }
