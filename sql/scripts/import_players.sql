@@ -11,12 +11,38 @@ SELECT 'Starting CSV import at: ' || NOW();
 SELECT 'Players table exists, proceeding with import...' 
 WHERE EXISTS (
     SELECT 1 FROM information_schema.tables 
-    WHERE table_name = 'players' AND table_schema = 'nba'
+    WHERE table_name = 'players' AND table_schema = 'public'
 );
 
 -- Import the CSV data using \copy (for client-side files)
+-- This approach imports to a temp table first, then inserts with proper defaults
+CREATE TEMP TABLE temp_players (
+    name TEXT,
+    year_start TEXT,
+    year_end TEXT,
+    position TEXT,
+    height TEXT,
+    weight TEXT,
+    birth_date TEXT,
+    college TEXT
+);
+
 -- UPDATE THIS LINE: Replace 'path/to/your/file.csv' with the actual path to your CSV file
-\copy players(name, year_start, year_end, position, height, weight, birth_date, college) FROM 'data/player_data.csv' WITH (FORMAT csv, HEADER true, NULL '', DELIMITER ',');
+\copy temp_players FROM 'data/player_data.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+
+-- Insert from temp table with proper handling of empty values
+INSERT INTO players(name, year_start, year_end, position, height, weight, birth_date, college)
+SELECT 
+    name,
+    CASE WHEN year_start = '' OR year_start IS NULL THEN 0 ELSE year_start::INTEGER END,
+    CASE WHEN year_end = '' OR year_end IS NULL THEN 0 ELSE year_end::INTEGER END,
+    COALESCE(NULLIF(position, ''), ''),
+    COALESCE(NULLIF(height, ''), ''),
+    CASE WHEN weight = '' OR weight IS NULL THEN 0 ELSE weight::INTEGER END,
+    CASE WHEN birth_date = '' OR birth_date IS NULL THEN '1900-01-01'::DATE 
+         ELSE TO_DATE(birth_date, 'Month DD, YYYY') END,
+    COALESCE(NULLIF(college, ''), '')
+FROM temp_players;
 
 
 -- Verify the import

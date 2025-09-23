@@ -5,19 +5,19 @@
 package database
 
 import (
-	"database/sql"
+	"time"
 )
 
 type Player struct {
-	ID        int32          `json:"id"`
-	Name      string         `json:"name"`
-	YearStart sql.NullInt32  `json:"year_start"`
-	YearEnd   sql.NullInt32  `json:"year_end"`
-	Position  sql.NullString `json:"position"`
-	Height    sql.NullString `json:"height"`
-	Weight    sql.NullInt32  `json:"weight"`
-	BirthDate sql.NullTime   `json:"birth_date"`
-	College   sql.NullString `json:"college"`
-	CreatedAt sql.NullTime   `json:"created_at"`
-	UpdatedAt sql.NullTime   `json:"updated_at"`
+	ID        int32     `json:"id"`
+	Name      string    `json:"name"`
+	YearStart int32     `json:"year_start"`
+	YearEnd   int32     `json:"year_end"`
+	Position  string    `json:"position"`
+	Height    string    `json:"height"`
+	Weight    int32     `json:"weight"`
+	BirthDate time.Time `json:"birth_date"`
+	College   string    `json:"college"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -18,7 +18,7 @@ type Server struct {
 }
 
 func New(store *internal.Store) *Server {
-	router := router.InitRouter()
+	router := router.InitRouter(store)
 
 	return &Server{
 		store: store,
