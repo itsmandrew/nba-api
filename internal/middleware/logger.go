@@ -14,11 +14,13 @@ func Logger(next http.Handler) http.Handler {
 		start := time.Now()
 
 		lrw := &loggingResponseWriter{w, http.StatusOK}
+		next.ServeHTTP(lrw, r)
+
 		end := time.Now()
 
 		duration := end.Sub(start)
 
-		var statusColor func(format string, a ...interface{}) string
+		var statusColor func(format string, a ...any) string
 
 		switch {
 		case lrw.statusCode >= 500:
