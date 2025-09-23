@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	internal "nba-api/internal/database"
-	h "nba-api/internal/handlers"
+	"nba-api/internal/router"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,14 +18,13 @@ type Server struct {
 }
 
 func New(store *internal.Store) *Server {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", h.HelloHandler)
+	router := router.InitRouter()
 
 	return &Server{
 		store: store,
 		server: &http.Server{
 			Addr:           ":8080",
-			Handler:        mux,
+			Handler:        router,
 			ReadTimeout:    5 * time.Second,
 			WriteTimeout:   10 * time.Second,
 			IdleTimeout:    15 * time.Second,
@@ -35,7 +34,6 @@ func New(store *internal.Store) *Server {
 }
 
 func (s *Server) Start() {
-
 	// Run server in a goroutine so we can listen for shutdown
 	go func() {
 		log.Println("Server starting on :8080")

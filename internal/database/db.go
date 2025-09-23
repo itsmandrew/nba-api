@@ -12,26 +12,26 @@ import (
 )
 
 type Config struct {
-	DB_URL string
+	DBUrl string
 }
 
 type Store struct {
-	DB      *sql.DB
+	DB      *sql.DB // Connection pool
 	Queries *sqlc.Queries
 }
 
 func LoadConfig() Config {
 	return Config{
-		DB_URL: os.Getenv("DB_LOCAL_URL"),
+		DBUrl: os.Getenv("DB_LOCAL_URL"),
 	}
 }
 
 func ConnectDB() (*Store, error) {
 	config := LoadConfig()
 
-	db_url := config.DB_URL
+	dbURL := config.DBUrl
 
-	db, err := sql.Open("postgres", db_url)
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		return nil, fmt.Errorf("could not open db: %w", err)
 	}
