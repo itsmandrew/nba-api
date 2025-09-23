@@ -17,3 +17,15 @@ func GetLeBronHandler(s *internal.Store) http.HandlerFunc {
 		response.RespondWithJSON(w, http.StatusOK, player)
 	}
 }
+
+func GetPlayersHandler(s *internal.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		players, err := s.Queries.GetPlayers(r.Context())
+		if err != nil {
+			response.ResponseWithError(w, http.StatusInternalServerError, "error retrieving players")
+			return
+		}
+
+		response.RespondWithJSON(w, http.StatusOK, players)
+	}
+}

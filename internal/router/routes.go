@@ -33,4 +33,5 @@ func registerUtilRoutes(r chi.Router) {
 
 func registerPlayerRoutes(r chi.Router, s *internal.Store) {
 	r.Get("/lebron", p.GetLeBronHandler(s))
+	r.Get("/players", p.GetPlayersHandler(s))
 }
