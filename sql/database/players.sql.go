@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 const getLeBronJames = `-- name: GetLeBronJames :one
@@ -34,7 +35,7 @@ func (q *Queries) GetLeBronJames(ctx context.Context) (Player, error) {
 }
 
 const getPlayerByID = `-- name: GetPlayerByID :one
-SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM PLAYERS
+SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM players
 WHERE id = $1
 `
 
@@ -58,7 +59,7 @@ func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
 }
 
 const getPlayerByName = `-- name: GetPlayerByName :many
-SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM PLAYERS
+SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM players
 WHERE name ILIKE $1
 `
 
@@ -123,6 +124,72 @@ func (q *Queries) GetPlayers(ctx context.Context) ([]Player, error) {
 			&i.College,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayersFiltered = `-- name: GetPlayersFiltered :many
+SELECT
+    id,
+    name,
+    position,
+    college,
+    year_start,
+    height,
+    weight,
+    birth_date
+FROM players
+WHERE ($1 = '' OR position ILIKE '%' || $1 || '%')
+  AND ($2 = '' OR college ILIKE '%' || $2 || '%')
+  AND ($3 = 0 OR year_start = $3)
+LIMIT 10
+`
+
+type GetPlayersFilteredParams struct {
+	Column1 interface{} `json:"column_1"`
+	Column2 interface{} `json:"column_2"`
+	Column3 interface{} `json:"column_3"`
+}
+
+type GetPlayersFilteredRow struct {
+	ID        int32     `json:"id"`
+	Name      string    `json:"name"`
+	Position  string    `json:"position"`
+	College   string    `json:"college"`
+	YearStart int32     `json:"year_start"`
+	Height    string    `json:"height"`
+	Weight    int32     `json:"weight"`
+	BirthDate time.Time `json:"birth_date"`
+}
+
+func (q *Queries) GetPlayersFiltered(ctx context.Context, arg GetPlayersFilteredParams) ([]GetPlayersFilteredRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPlayersFiltered, arg.Column1, arg.Column2, arg.Column3)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPlayersFilteredRow
+	for rows.Next() {
+		var i GetPlayersFilteredRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Position,
+			&i.College,
+			&i.YearStart,
+			&i.Height,
+			&i.Weight,
+			&i.BirthDate,
 		); err != nil {
 			return nil, err
 		}

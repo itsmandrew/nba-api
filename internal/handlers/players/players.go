@@ -3,6 +3,7 @@ package players
 import (
 	internal "nba-api/internal/database"
 	"nba-api/internal/response"
+	"nba-api/sql/database"
 	"net/http"
 	"strconv"
 
@@ -25,7 +26,27 @@ func GetLeBronHandler(s *internal.Store) http.HandlerFunc {
 // GET /v1/players
 func GetPlayersHandler(s *internal.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		players, err := s.Queries.GetPlayers(r.Context())
+		position := r.URL.Query().Get("position")
+		college := r.URL.Query().Get("college")
+		yearStartStr := r.URL.Query().Get("year_start")
+
+		var yearStart int32
+		if yearStartStr != "" {
+			y, err := strconv.Atoi(yearStartStr)
+			if err != nil {
+				response.ResponseWithError(w, http.StatusBadRequest, "invalid start year format")
+				return
+			}
+			yearStart = int32(y)
+		}
+
+		params := database.GetPlayersFilteredParams{
+			Column1: position,
+			Column2: college,
+			Column3: yearStart,
+		}
+
+		players, err := s.Queries.GetPlayersFiltered(r.Context(), params)
 		if err != nil {
 			response.ResponseWithError(w, http.StatusInternalServerError, "error retrieving players")
 			return
