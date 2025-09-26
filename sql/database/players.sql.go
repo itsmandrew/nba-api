@@ -33,6 +33,70 @@ func (q *Queries) GetLeBronJames(ctx context.Context) (Player, error) {
 	return i, err
 }
 
+const getPlayerByID = `-- name: GetPlayerByID :one
+SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM PLAYERS
+WHERE id = $1
+`
+
+func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
+	row := q.db.QueryRowContext(ctx, getPlayerByID, id)
+	var i Player
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.YearStart,
+		&i.YearEnd,
+		&i.Position,
+		&i.Height,
+		&i.Weight,
+		&i.BirthDate,
+		&i.College,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getPlayerByName = `-- name: GetPlayerByName :many
+SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM PLAYERS
+WHERE name = $1
+`
+
+func (q *Queries) GetPlayerByName(ctx context.Context, name string) ([]Player, error) {
+	rows, err := q.db.QueryContext(ctx, getPlayerByName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Player
+	for rows.Next() {
+		var i Player
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.YearStart,
+			&i.YearEnd,
+			&i.Position,
+			&i.Height,
+			&i.Weight,
+			&i.BirthDate,
+			&i.College,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlayers = `-- name: GetPlayers :many
 SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM players
 LIMIT 10
