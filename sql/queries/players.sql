@@ -13,5 +13,5 @@ WHERE id = $1;
 
 -- name: GetPlayerByName :many
 SELECT * FROM PLAYERS
-WHERE name = $1;
+WHERE name ILIKE $1;
 

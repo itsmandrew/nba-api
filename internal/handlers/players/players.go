@@ -36,7 +36,7 @@ func GetPlayersHandler(s *internal.Store) http.HandlerFunc {
 }
 
 // GET /v1/players/{id}
-func GetPlayerFromID(s *internal.Store) http.HandlerFunc {
+func GetPlayerFromIDHandler(s *internal.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idParam := chi.URLParam(r, "id")
 
@@ -53,5 +53,24 @@ func GetPlayerFromID(s *internal.Store) http.HandlerFunc {
 		}
 
 		response.RespondWithJSON(w, http.StatusOK, player)
+	}
+}
+
+// GET /v1/players/search
+func GetPlayerFromNameHandler(s *internal.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name := r.URL.Query().Get("name")
+		if name == "" {
+			response.ResponseWithError(w, http.StatusBadRequest, "no name provided")
+			return
+		}
+
+		players, err := s.Queries.GetPlayerByName(r.Context(), name)
+		if err != nil {
+			response.ResponseWithError(w, http.StatusInternalServerError, "errors searching for players")
+			return
+		}
+
+		response.RespondWithJSON(w, http.StatusOK, players)
 	}
 }

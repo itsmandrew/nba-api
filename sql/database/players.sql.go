@@ -59,7 +59,7 @@ func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
 
 const getPlayerByName = `-- name: GetPlayerByName :many
 SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM PLAYERS
-WHERE name = $1
+WHERE name ILIKE $1
 `
 
 func (q *Queries) GetPlayerByName(ctx context.Context, name string) ([]Player, error) {
