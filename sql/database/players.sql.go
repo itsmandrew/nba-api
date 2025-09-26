@@ -203,3 +203,28 @@ func (q *Queries) GetPlayersFiltered(ctx context.Context, arg GetPlayersFiltered
 	}
 	return items, nil
 }
+
+const getRandomPlayer = `-- name: GetRandomPlayer :one
+SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM players
+ORDER BY RANDOM()
+LIMIT 1
+`
+
+func (q *Queries) GetRandomPlayer(ctx context.Context) (Player, error) {
+	row := q.db.QueryRowContext(ctx, getRandomPlayer)
+	var i Player
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.YearStart,
+		&i.YearEnd,
+		&i.Position,
+		&i.Height,
+		&i.Weight,
+		&i.BirthDate,
+		&i.College,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

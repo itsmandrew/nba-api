@@ -36,4 +36,5 @@ func registerPlayerRoutes(r chi.Router, s *internal.Store) {
 	r.Get("/players", p.GetPlayersHandler(s))
 	r.Get("/players/{id}", p.GetPlayerFromIDHandler(s))
 	r.Get("/players/search", p.GetPlayerFromNameHandler(s))
+	r.Get("/players/random", p.GetRandomPlayerHandler(s))
 }

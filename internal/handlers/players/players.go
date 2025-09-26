@@ -95,3 +95,16 @@ func GetPlayerFromNameHandler(s *internal.Store) http.HandlerFunc {
 		response.RespondWithJSON(w, http.StatusOK, players)
 	}
 }
+
+// GET /v1/players/random
+func GetRandomPlayerHandler(s *internal.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		player, err := s.Queries.GetRandomPlayer(r.Context())
+		if err != nil {
+			response.ResponseWithError(w, http.StatusInternalServerError, "error retrieving random player")
+			return
+		}
+
+		response.RespondWithJSON(w, http.StatusOK, player)
+	}
+}

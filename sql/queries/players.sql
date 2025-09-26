@@ -30,3 +30,9 @@ WHERE ($1 = '' OR position ILIKE '%' || $1 || '%')
   AND ($2 = '' OR college ILIKE '%' || $2 || '%')
   AND ($3 = 0 OR year_start = $3)
 LIMIT 10;
+
+-- name: GetRandomPlayer :one
+SELECT * FROM players
+ORDER BY RANDOM()
+LIMIT 1;
+
