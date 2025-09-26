@@ -19,6 +19,7 @@ func InitRouter(s *internal.Store) http.Handler {
 	// Chaining my middleware
 	router.Use(md.Logger)
 	router.Use(middleware.Recoverer)
+	router.Use(md.BearerAuth)
 
 	v1Router := chi.NewRouter()
 	registerUtilRoutes(v1Router)
