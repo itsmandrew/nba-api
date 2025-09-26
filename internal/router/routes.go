@@ -10,11 +10,15 @@ import (
 	h "nba-api/internal/handlers/utils"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 func InitRouter(s *internal.Store) http.Handler {
 	router := chi.NewRouter()
+
+	// Chaining my middleware
 	router.Use(md.Logger)
+	router.Use(middleware.Recoverer)
 
 	v1Router := chi.NewRouter()
 	registerUtilRoutes(v1Router)
