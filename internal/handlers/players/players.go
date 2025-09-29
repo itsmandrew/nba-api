@@ -108,3 +108,16 @@ func GetRandomPlayerHandler(s *internal.Store) http.HandlerFunc {
 		response.RespondWithJSON(w, http.StatusOK, player)
 	}
 }
+
+// GET /v1/colleges
+func GetAllCollegesHander(s *internal.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		colleges, err := s.Queries.GetAllColleges(r.Context())
+		if err != nil {
+			response.ResponseWithError(w, http.StatusInternalServerError, "error retrieving colleges")
+			return
+		}
+
+		response.RespondWithJSON(w, http.StatusOK, colleges)
+	}
+}

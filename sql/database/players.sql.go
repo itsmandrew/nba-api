@@ -10,6 +10,36 @@ import (
 	"time"
 )
 
+const getAllColleges = `-- name: GetAllColleges :many
+SELECT DISTINCT college
+FROM players
+WHERE college IS NOT NULL AND college <> ''
+LIMIT 10
+`
+
+func (q *Queries) GetAllColleges(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getAllColleges)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var college string
+		if err := rows.Scan(&college); err != nil {
+			return nil, err
+		}
+		items = append(items, college)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLeBronJames = `-- name: GetLeBronJames :one
 SELECT id, name, year_start, year_end, position, height, weight, birth_date, college, created_at, updated_at FROM players
 WHERE name LIKE '%LeBron%' LIMIT 1

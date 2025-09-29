@@ -24,6 +24,7 @@ func InitRouter(s *internal.Store) http.Handler {
 	v1Router := chi.NewRouter()
 	registerUtilRoutes(v1Router)
 	registerPlayerRoutes(v1Router, s)
+	registerOtherRoutes(v1Router, s)
 
 	router.Mount("/v1", v1Router)
 
@@ -42,4 +43,8 @@ func registerPlayerRoutes(r chi.Router, s *internal.Store) {
 	r.Get("/players/{id}", p.GetPlayerFromIDHandler(s))
 	r.Get("/players/search", p.GetPlayerFromNameHandler(s))
 	r.Get("/players/random", p.GetRandomPlayerHandler(s))
+}
+
+func registerOtherRoutes(r chi.Router, s *internal.Store) {
+	r.Get("/colleges", p.GetAllCollegesHander(s))
 }

@@ -36,3 +36,8 @@ SELECT * FROM players
 ORDER BY RANDOM()
 LIMIT 1;
 
+-- name: GetAllColleges :many
+SELECT DISTINCT college
+FROM players
+WHERE college IS NOT NULL AND college <> ''
+LIMIT 10;
