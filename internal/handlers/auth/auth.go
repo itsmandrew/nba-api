@@ -8,7 +8,7 @@ import (
 
 func GenerateTokenHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey := r.Header.Get("X-API-Key")
-	if apiKey != "NBA_API_KEY" {
+	if apiKey != "API_KEY" {
 		response.ResponseWithError(w, http.StatusUnauthorized, "invalid api key")
 		return
 	}

@@ -1,7 +1,7 @@
 
 # Configurable API URL and API key
 API_URL ?= http://localhost:8080/v1
-API_KEY ?= NBA_API_KEY
+API_KEY ?= API_KEY
 PRIVATE_ENDPOINT ?= players/random
 TOKEN_LIFETIME ?= 5 # seconds
 

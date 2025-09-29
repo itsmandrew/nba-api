@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nba-api/internal/response"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -16,7 +17,7 @@ var validTokens = map[string]string{
 	"secret123": "LeBron",
 }
 
-var jwtSecret = []byte("NBA_API_KEY")
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func GenerateJWT(subject string) (string, error) {
 	claims := jwt.MapClaims{
