@@ -21,7 +21,7 @@ var jwtSecret = []byte("NBA_API_KEY")
 func GenerateJWT(subject string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": subject,
-		"exp": time.Now().Add(time.Second * 10).Unix(), // 30 days
+		"exp": time.Now().Add(time.Minute * 15).Unix(), // 30 days
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -86,23 +86,11 @@ func JWTAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		if !token.Valid {
-			response.ResponseWithError(w, http.StatusUnauthorized, "invalid token signature")
-			return
-		}
-
+		// Extract claims safely
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			response.ResponseWithError(w, http.StatusUnauthorized, "invalid token claims")
 			return
-		}
-
-		// Check expiration
-		if exp, ok := claims["exp"].(float64); ok {
-			if time.Now().Unix() > int64(exp) {
-				response.ResponseWithError(w, http.StatusUnauthorized, "token expired")
-				return
-			}
 		}
 
 		// Check sub
