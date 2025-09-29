@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	github.com/fatih/color v1.18.0
 	github.com/go-chi/chi v1.5.5
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 )
