@@ -17,9 +17,12 @@ var validTokens = map[string]string{
 	"secret123": "LeBron",
 }
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
-
 func GenerateJWT(subject string) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "", fmt.Errorf("JWT_SECRET not set")
+	}
+
 	claims := jwt.MapClaims{
 		"sub": subject,
 		"exp": time.Now().Add(time.Minute * 15).Unix(), // 30 days
@@ -27,7 +30,7 @@ func GenerateJWT(subject string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(jwtSecret)
+	return token.SignedString([]byte(secret))
 }
 
 func BearerAuth(next http.Handler) http.Handler {
@@ -80,7 +83,12 @@ func JWTAuth(next http.Handler) http.Handler {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method")
 			}
-			return jwtSecret, nil
+
+			secret := os.Getenv("JWT_SECRET")
+			if secret == "" {
+				return nil, fmt.Errorf("JWT_SECRET env variable not set")
+			}
+			return []byte(secret), nil
 		})
 		if err != nil {
 			response.ResponseWithError(w, http.StatusUnauthorized, "failed to parse token: "+err.Error())

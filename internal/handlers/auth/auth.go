@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"nba-api/internal/middleware"
 	"nba-api/internal/response"
 	"net/http"
@@ -15,7 +16,9 @@ func GenerateTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := middleware.GenerateJWT("local testing")
 	if err != nil {
-		response.ResponseWithError(w, http.StatusInternalServerError, "failed to generate token")
+
+		response.ResponseWithError(w, http.StatusInternalServerError,
+			fmt.Sprintf("failed to generate token: %v", err))
 		return
 	}
 
