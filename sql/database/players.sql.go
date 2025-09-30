@@ -182,13 +182,16 @@ FROM players
 WHERE ($1 = '' OR position ILIKE '%' || $1 || '%')
   AND ($2 = '' OR college ILIKE '%' || $2 || '%')
   AND ($3 = 0 OR year_start = $3)
-LIMIT 10
+LIMIT $4
+OFFSET $5
 `
 
 type GetPlayersFilteredParams struct {
 	Column1 interface{} `json:"column_1"`
 	Column2 interface{} `json:"column_2"`
 	Column3 interface{} `json:"column_3"`
+	Limit   int32       `json:"limit"`
+	Offset  int32       `json:"offset"`
 }
 
 type GetPlayersFilteredRow struct {
@@ -203,7 +206,13 @@ type GetPlayersFilteredRow struct {
 }
 
 func (q *Queries) GetPlayersFiltered(ctx context.Context, arg GetPlayersFilteredParams) ([]GetPlayersFilteredRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPlayersFiltered, arg.Column1, arg.Column2, arg.Column3)
+	rows, err := q.db.QueryContext(ctx, getPlayersFiltered,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ API_KEY ?= API_KEY
 PRIVATE_ENDPOINT ?= players/random
 TOKEN_LIFETIME ?= 5 # seconds
 RATE_LIMIT_TEST_REQUESTS ?= 25
+BASE_URL ?= localhost:8080/v1/players
 
 .PHONY: test-expiration call-private
 
@@ -47,3 +48,15 @@ test-ratelimit:
 		curl -s -o /dev/null -w "HTTP %{http_code}\n" $(API_URL)/$(PRIVATE_ENDPOINT) \
 			-H "Authorization: Bearer $$TOKEN"; \
 	done
+
+
+
+test-pagination:
+	@echo "Testing pagination"
+	@TOKEN=$$(curl -s -X POST $(API_URL)/generate-token \
+		-H "X-API-KEY: $(API_KEY)" | jq -r .token) && \
+	echo "Token: $$TOKEN" && \
+	echo "Fetching page 1..." && \
+	curl -s "$(BASE_URL)?limit=10&page=1" -H "Authorization: Bearer $$TOKEN" | jq . && \
+	echo "\nFetching page 2..." && \
+	curl -s "$(BASE_URL)?limit=10&page=2" -H "Authorization: Bearer $$TOKEN" | jq .

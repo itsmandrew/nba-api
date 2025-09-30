@@ -29,6 +29,8 @@ func GetPlayersHandler(s *internal.Store) http.HandlerFunc {
 		position := r.URL.Query().Get("position")
 		college := r.URL.Query().Get("college")
 		yearStartStr := r.URL.Query().Get("year_start")
+		pageStr := r.URL.Query().Get("page")
+		limitStr := r.URL.Query().Get("limit")
 
 		var yearStart int32
 		if yearStartStr != "" {
@@ -40,10 +42,34 @@ func GetPlayersHandler(s *internal.Store) http.HandlerFunc {
 			yearStart = int32(y)
 		}
 
+		page := 1
+		if pageStr != "" {
+			p, err := strconv.Atoi(pageStr)
+			if err != nil || p < 1 {
+				response.ResponseWithError(w, http.StatusBadRequest, "invalid page number")
+				return
+			}
+			page = p
+		}
+
+		limit := 10
+		if limitStr != "" {
+			l, err := strconv.Atoi(limitStr)
+			if err != nil || l < 1 {
+				response.ResponseWithError(w, http.StatusBadRequest, "invalid limit number")
+				return
+			}
+			limit = l
+		}
+
+		offset := (page - 1) * limit
+
 		params := database.GetPlayersFilteredParams{
 			Column1: position,
 			Column2: college,
 			Column3: yearStart,
+			Limit:   int32(limit),
+			Offset:  int32(offset),
 		}
 
 		players, err := s.Queries.GetPlayersFiltered(r.Context(), params)

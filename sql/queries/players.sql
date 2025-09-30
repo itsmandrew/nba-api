@@ -29,7 +29,8 @@ FROM players
 WHERE ($1 = '' OR position ILIKE '%' || $1 || '%')
   AND ($2 = '' OR college ILIKE '%' || $2 || '%')
   AND ($3 = 0 OR year_start = $3)
-LIMIT 10;
+LIMIT $4
+OFFSET $5;
 
 -- name: GetRandomPlayer :one
 SELECT * FROM players
