@@ -4,6 +4,7 @@ API_URL ?= http://localhost:8080/v1
 API_KEY ?= API_KEY
 PRIVATE_ENDPOINT ?= players/random
 TOKEN_LIFETIME ?= 5 # seconds
+RATE_LIMIT_TEST_REQUESTS ?= 25
 
 .PHONY: test-expiration call-private
 
@@ -33,3 +34,16 @@ test-expiration:
 	curl -s $(API_URL)/$(PRIVATE_ENDPOINT) \
 		-H "Authorization: Bearer $$TOKEN" | jq .
 
+
+# Test rate limiter by making repeated calls
+test-ratelimit:
+	@echo "Generating JWT for rate limit test..."
+	@TOKEN=$$(curl -s -X POST $(API_URL)/generate-token \
+		-H "X-API-KEY: $(API_KEY)" | jq -r .token) && \
+	echo "Token: $$TOKEN" && \
+	echo "Sending $(RATE_LIMIT_TEST_REQUESTS) requests to $(PRIVATE_ENDPOINT)..." && \
+	for i in $$(seq 1 $(RATE_LIMIT_TEST_REQUESTS)); do \
+		echo "Request $$i:"; \
+		curl -s -o /dev/null -w "HTTP %{http_code}\n" $(API_URL)/$(PRIVATE_ENDPOINT) \
+			-H "Authorization: Bearer $$TOKEN"; \
+	done

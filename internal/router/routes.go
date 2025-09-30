@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	internal "nba-api/internal/database"
 	md "nba-api/internal/middleware"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/httprate"
 )
 
 func InitRouter(s *internal.Store) http.Handler {
@@ -21,6 +23,8 @@ func InitRouter(s *internal.Store) http.Handler {
 	router.Use(md.Logger)
 	router.Use(middleware.Recoverer)
 
+	router.Use(httprate.LimitByIP(20, time.Minute))
+
 	router.Route("/v1", func(r chi.Router) {
 		// ---- Public Routes -----
 		registerAuthRoutes(r)
@@ -29,6 +33,8 @@ func InitRouter(s *internal.Store) http.Handler {
 		// ---- Private Routes ----
 		r.Group(func(private chi.Router) {
 			private.Use(md.JWTAuth)
+
+			private.Use(httprate.LimitByIP(20, time.Minute))
 
 			registerPlayerRoutes(private, s)
 			registerOtherRoutes(private, s)
